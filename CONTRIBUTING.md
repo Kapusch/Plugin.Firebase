@@ -8,6 +8,8 @@ Thanks for contributing! This repo is public OSS. Please keep contributions gene
 3) Run formatting and relevant builds.
 4) Open a PR with a clear description.
 
+Build/toolchain details (macOS iOS builds): see `BUILDING.md`.
+
 ## Development guidelines
 - Follow `.editorconfig` rules.
 - Format code before PRs: `dotnet format Plugin.Firebase.sln`
