@@ -13,6 +13,7 @@ Build/toolchain details (macOS iOS builds): see `BUILDING.md`.
 ## Development guidelines
 - Follow `.editorconfig` rules.
 - Format code before PRs: `dotnet format Plugin.Firebase.sln`
+- Formatting is required before every PR.
 - Avoid app-specific or proprietary context in code/docs.
 - Never commit secrets (Firebase configs, signing keys, tokens).
 - Keep API changes backward-compatible when possible.
@@ -53,3 +54,6 @@ dotnet format Plugin.Firebase.sln --include $(git diff --name-only --cached)
 
 ## Documentation
 If you change behavior or APIs, update the relevant docs in `docs/` and/or `README.md`.
+
+## XML docs
+When adding or changing public APIs, prefer adding/updating XML doc comments so the generated `.xml` documentation stays useful.
