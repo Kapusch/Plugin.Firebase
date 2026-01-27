@@ -32,8 +32,11 @@ public sealed class FirebaseUserWrapper : IFirebaseUser
 
     public Task UpdatePhoneNumberAsync(string verificationId, string smsCode)
     {
-        return WrapAsync(_wrapped.UpdatePhoneNumberAsync(
-            PhoneAuthProvider.GetCredential(verificationId, smsCode)));
+        return WrapAsync(
+            _wrapped.UpdatePhoneNumberAsync(
+                PhoneAuthProvider.GetCredential(verificationId, smsCode)
+            )
+        );
     }
 
     public Task UpdateProfileAsync(string displayName = "", string photoUrl = "")
@@ -43,14 +46,17 @@ public sealed class FirebaseUserWrapper : IFirebaseUser
             builder.SetDisplayName(displayName);
         }
         if(photoUrl != "") {
-            builder.SetPhotoUri(photoUrl == null ? null : Uri.Parse(photoUrl));
+            builder.SetPhotoUri(string.IsNullOrEmpty(photoUrl) ? null : Uri.Parse(photoUrl));
         }
         return WrapAsync(_wrapped.UpdateProfileAsync(builder.Build()));
     }
 
-    public Task SendEmailVerificationAsync(ActionCodeSettings actionCodeSettings = null)
+    public Task SendEmailVerificationAsync(ActionCodeSettings? actionCodeSettings = null)
     {
+        // Android binding only exposes a single overload; passing null is valid at runtime
+#pragma warning disable CS8604 // Possible null reference argument
         return WrapAsync(_wrapped.SendEmailVerificationAsync(actionCodeSettings?.ToNative()));
+#pragma warning restore CS8604
     }
 
     public Task UnlinkAsync(string providerId)
@@ -96,7 +102,8 @@ public sealed class FirebaseUserWrapper : IFirebaseUser
         }
     }
 
-    private static async Task<T> WrapAsync<T>(global::Android.Gms.Tasks.Task task) where T : Java.Lang.Object
+    private static async Task<T> WrapAsync<T>(global::Android.Gms.Tasks.Task task)
+        where T : Java.Lang.Object
     {
         try {
             return await task.AsAsync<T>().ConfigureAwait(false);
@@ -106,12 +113,13 @@ public sealed class FirebaseUserWrapper : IFirebaseUser
     }
 
     public string Uid => _wrapped.Uid;
-    public string DisplayName => _wrapped.DisplayName;
-    public string Email => _wrapped.Email;
-    public string PhotoUrl => _wrapped.PhotoUrl?.ToString();
+    public string? DisplayName => _wrapped.DisplayName;
+    public string? Email => _wrapped.Email;
+    public string? PhotoUrl => _wrapped.PhotoUrl?.ToString();
     public string ProviderId => _wrapped.ProviderId;
     public bool IsEmailVerified => _wrapped.IsEmailVerified;
     public bool IsAnonymous => _wrapped.IsAnonymous;
-    public IEnumerable<ProviderInfo> ProviderInfos => _wrapped.ProviderData?.Select(x => x.ToAbstract());
-    public UserMetadata Metadata => _wrapped.Metadata?.ToAbstract();
+    public IEnumerable<ProviderInfo>? ProviderInfos =>
+        _wrapped.ProviderData?.Select(x => x.ToAbstract());
+    public UserMetadata? Metadata => _wrapped.Metadata?.ToAbstract();
 }

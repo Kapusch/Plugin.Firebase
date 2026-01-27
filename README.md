@@ -2,6 +2,9 @@
 
 This is a wrapper library around the native Android and iOS Firebase SDKs which includes cross-platform APIs for most of the Firebase features. Documentation and the included sample app are MAUI-centric, but the plugin should be usable in any cross-platform .NET9+ project.
 
+## Build / toolchain setup
+See `BUILDING.md` for a reproducible macOS setup (SDK/workloads/Xcode), verification commands, and troubleshooting.
+
 ## v4.0 Upgrade Notes
 - The experience of building projects using this plugin has been improved on Windows / Visual Studio. Issues related to hanging builds caused by XamarinBuildDownload and long path issues affecting iOS NuGet packages have been mitigated, if not commpletely resolved.
 - MAUI-specific dependencies have been removed. This makes the plugin friendlier to non-MAUI mobile .NET projects.
