@@ -70,6 +70,11 @@ Since code should be documenting itself you can also take a look at the followin
 - [tests/.../AuthFixture.cs](https://github.com/TobiasBuchholz/Plugin.Firebase/blob/master/tests/Plugin.Firebase.IntegrationTests/Auth/AuthFixture.cs)
 - [sample/.../AuthService.cs](https://github.com/TobiasBuchholz/Plugin.Firebase/blob/master/sample/Playground/Common/Services/Auth/AuthService.cs)
 
+## Language
+
+Use `SetLanguageCode("fr")` (or any BCP-47 code) before invoking an Auth flow that triggers user-facing content such as password-reset emails, email-verification emails, or phone-auth SMS.
+Pass `null` or whitespace to reset to the app language (`UseAppLanguage`).
+
 ## Error handling
 
 Most Auth operations can throw `FirebaseAuthException`.  
@@ -79,6 +84,9 @@ The exception contains:
 - `Email`: populated for account-collision cases when available
 
 ## Release notes
+- Version 4.1.0
+  - Add `ReloadCurrentUserAsync()` to refresh the currently signed in user from the backend.
+  - Add `SetLanguageCode(string?)` to control the language used for Auth-generated user-facing flows (reset/verification emails, SMS).
 - Version 4.0.1
   - Improve `FirebaseAuthException` mapping and expose raw error details (`ErrorCode`, `Email`, and native error metadata) to support robust UI handling.
 - Version 4.0.0

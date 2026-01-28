@@ -141,9 +141,11 @@ public sealed class FirebaseAuthImplementation : DisposableBase, IFirebaseAuth
     {
         _firebaseAuth.SignOut(out var error);
 
-        return error is null
-            ? Task.CompletedTask
-            : throw GetFirebaseAuthException(new NSErrorException(error));
+        if(error is null) {
+            return Task.CompletedTask;
+        }
+
+        throw GetFirebaseAuthException(new NSErrorException(error));
     }
 
     /// <inheritdoc/>
@@ -178,6 +180,28 @@ public sealed class FirebaseAuthImplementation : DisposableBase, IFirebaseAuth
     public async Task SendPasswordResetEmailAsync(string email)
     {
         await WrapAsync(_firebaseAuth.SendPasswordResetAsync(email));
+    }
+
+    public async Task ReloadCurrentUserAsync()
+    {
+        var currentUser = _firebaseAuth.CurrentUser;
+        if(currentUser is null) {
+            throw new FirebaseException(
+                "CurrentUser is null. You need to be logged in to use this feature."
+            );
+        }
+
+        await WrapAsync(currentUser.ReloadAsync());
+    }
+
+    public void SetLanguageCode(string? languageCode)
+    {
+        if(string.IsNullOrWhiteSpace(languageCode)) {
+            _firebaseAuth.UseAppLanguage();
+            return;
+        }
+
+        _firebaseAuth.LanguageCode = languageCode;
     }
 
     /// <inheritdoc/>
