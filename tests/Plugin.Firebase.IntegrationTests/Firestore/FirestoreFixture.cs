@@ -466,9 +466,64 @@ namespace Plugin.Firebase.IntegrationTests.Firestore
             Assert.Single(snapshot2.Documents);
         }
 
+        [Fact]
+        public async Task reads_android_typed_numeric_collection_values()
+        {
+            if(!OperatingSystem.IsAndroid()) {
+                return;
+            }
+
+            var sut = CrossFirebaseFirestore.Current;
+            var document = sut.GetDocument("testing/android-typed-numeric-collections");
+            await document.SetDataAsync(new Dictionary<object, object> {
+                {
+                    "counts",
+                    new Dictionary<object, object> {
+                        { "one", 1L },
+                        { "two", 2L }
+                    }
+                },
+                { "nullable_counts", new object[] { 1L, null, 3L } },
+                {
+                    "types",
+                    new Dictionary<object, object> {
+                        { "fire", PokeType.Fire },
+                        { "water", PokeType.Water }
+                    }
+                }
+            });
+
+            var snapshot = await document.GetDocumentSnapshotAsync<AndroidNumericCollectionsDocument>();
+
+            Assert.Equal(1, snapshot.Data.Counts["one"]);
+            Assert.Equal(2, snapshot.Data.Counts["two"]);
+            Assert.Equal(new int?[] { 1, null, 3 }, snapshot.Data.NullableCounts);
+            Assert.Equal(PokeType.Fire, snapshot.Data.Types["fire"]);
+            Assert.Equal(PokeType.Water, snapshot.Data.Types["water"]);
+        }
+
         public async Task DisposeAsync()
         {
             await CrossFirebaseFirestore.Current.DeleteCollectionAsync<Pokemon>("testing", batchSize: 10);
         }
+
+        [Preserve(AllMembers = true)]
+        private sealed class AndroidNumericCollectionsDocument : IFirestoreObject
+        {
+            public AndroidNumericCollectionsDocument()
+            {
+                // needed for firestore
+            }
+
+            [FirestoreProperty("counts")]
+            public Dictionary<string, int> Counts { get; private set; }
+
+            [FirestoreProperty("nullable_counts")]
+            public IList<int?> NullableCounts { get; private set; }
+
+            [FirestoreProperty("types")]
+            public Dictionary<string, PokeType> Types { get; private set; }
+        }
+
     }
 }
