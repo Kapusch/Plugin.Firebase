@@ -23,6 +23,8 @@ public static class NSObjectExtensions
                 return x.ToString();
             case NSDate x:
                 return x.ToDateTimeOffset();
+            case NSDictionary x:
+                return x.ToDictionaryObject(targetType);
             case NSArray x:
                 return x.ToList(GetGenericListType(targetType)!);
             case NSNull:
@@ -42,11 +44,16 @@ public static class NSObjectExtensions
     /// <returns>The converted .NET numeric value, or null if the type is not supported.</returns>
     public static object? ToObject(this NSNumber @this, Type? targetType = null)
     {
-        if(targetType == null) {
-            return @this.Int32Value;
+        if(targetType == null || targetType == typeof(object)) {
+            return @this.ToUntypedObject();
         }
 
-        switch(Type.GetTypeCode(targetType)) {
+        var conversionType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+        if(conversionType.IsEnum) {
+            return Enum.ToObject(conversionType, @this.Int64Value);
+        }
+
+        switch(Type.GetTypeCode(conversionType)) {
             case TypeCode.Boolean:
                 return @this.BoolValue;
             case TypeCode.Char:
@@ -76,7 +83,38 @@ public static class NSObjectExtensions
         }
     }
 
-    private static Type? GetGenericListType(Type? targetType)
+    private static object ToUntypedObject(this NSNumber @this)
+    {
+        switch(@this.ObjCType) {
+            case "B":
+            case "c":
+                return @this.BoolValue;
+            case "C":
+                return @this.ByteValue;
+            case "s":
+                return @this.Int16Value;
+            case "S":
+                return @this.UInt16Value;
+            case "i":
+                return @this.Int32Value;
+            case "I":
+                return @this.UInt32Value;
+            case "q":
+            case "l":
+                return @this.Int64Value;
+            case "Q":
+            case "L":
+                return @this.UInt64Value;
+            case "f":
+                return @this.FloatValue;
+            case "d":
+                return @this.DoubleValue;
+            default:
+                return @this.Int64Value;
+        }
+    }
+
+    private static Type GetGenericListType(Type? targetType)
     {
         var genericType = targetType?.GenericTypeArguments?.FirstOrDefault();
         if(genericType == null) {
